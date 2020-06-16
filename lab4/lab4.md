@@ -201,12 +201,54 @@ int main()
 
 
 * 配置一个Windbg双机内核调试环境，查阅Windbg的文档，了解（1）Windbg如何在内核调试情况下看物理内存，也就是通过物理地址访问内存（2）如何查看进程的虚拟内存分页表，在分页表中找到物理内存和虚拟内存的对应关系。然后通过Windbg的物理内存查看方式和虚拟内存的查看方式，看同一块物理内存中的数据情况。
-* 虚拟机安装windows7系统，主机上安装好[windbg](https://docs.microsoft.com/en-us/windows-hardware/drivers/debugger/debugger-download-tools)
+* 虚拟机安装windows7系统，主机安装windbg preview
 * 为虚拟机配置虚拟串口，为建立 HOST 到 GUEST 的调试通信连接
 
-# 实验要点
+<img src="pic\8.png" style="zoom:80%;" />
 
-## 内存管理
+* 以管理员身份运行win7的CMD命令行，输入bcdedit命令，可以查看到系统的当前启动项
+
+  <img src="pic\9.png" style="zoom:80%;" />
+
+* 接着我们连续执行下方的三条命令，依次建立启动项，并激活调试模式。
+
+```shell
+bcdedit /copy {current} /d "Windwos7"
+bcdedit /debug ON
+bcdedit /bootdebug ON
+bcdedit /timeout 10
+```
+
+<img src="pic\10.png" style="zoom:80%;" />
+
+* 查看当前调试配置选项，执行命令 bcdedit /dbgsettings
+
+<img src="pic\11.png" style="zoom:80%;" />
+
+* 配置完成后，重新启动系统
+* 在开机的时候选择 Windows7 [启用调试程序] 则系统会黑屏，说明已经正常进入调试模式了。
+
+<img src="pic\12.png" style="zoom:80%;" />
+
+<img src="pic\13.png" style="zoom:80%;" />
+
+* 按照下图操作
+
+<img src="pic\14.png" style="zoom:80%;" />
+
+* 回到物理机，我们在命令行中切换到WinDBG的根目录下，并执行以下命令，即可连接虚拟机串口进行调试
+* 执行命令 Windbg.exe -k com:port=\\.\pipe\com_1,baud=115200,pipe
+* 此时虚拟机会卡死-_-
+
+<img src="pic\15.png" style="zoom:80%;" />
+
+* 打开记事本，输入一串字符串。然后点击WinDbg的break按钮，使操作系统断下来。使用 !process 0 0 命令查看当前系统所有进程信息，找到记事本所在进程
+* 切换到记事本的进程,使用.process -i 进程块地址 命令，在输入 g 命令将WinDbg当前调试进程切换到notepad.exe。然后使用s -u命令再记事本进程中搜索预先输入的字符串
+
+<img src="pic\16.png" style="zoom:80%;" />
+
+# 实验结论
+内存管理
 
 * 以4KB（页）作为基本管理单元的虚拟内存管理。
 * 虚拟内存管理是一套虚拟地址和物理地址对应的机制。
@@ -222,3 +264,5 @@ int main()
 * 真正的地址有效还是无效是以分页为单位的。
 * 内存分页可以直接映射到磁盘文件（FileMapping）、系统内核有内存分页是映射物理内存还是映射磁盘文件的内存交换机制。
 * 完成内存分页管理的相关实验
+
+> WINDBG:https://blog.csdn.net/chaootis1/article/details/79834117?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.nonecase&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.nonecase
