@@ -118,7 +118,7 @@
 
 * 使用pwntools库把shellcode作为输入传递给程序，尝试使用io.interactive()与程序进行交互，发现可以执行shell命令。
 
-<img src="pic\11.png" style="zoom:80%;" />
+<img src="pic\11.png" style="zoom:60%;" />
 
 * 找到kernel32.dll的基址
 
